@@ -1,0 +1,275 @@
+认 VV
+骗 VV
+跌 VV
+逮 VV
+拨 VV
+订 VV
+讯 VV NN
+疼 NN
+降 VV
+讨 NN
+乱 NN
+冲 VV NN
+买 VV
+压 VV NN
+撕 AD
+拿 VV
+失 VV NN
+追 VV NN
+逼 VV
+撞 VV
+渡 VV
+设 VV
+访 VV NN
+归 VV
+论 NN
+跑 VV
+选 VV NN
+撤 VV
+拍 VV NN
+去 VV
+处 VV
+跨 JJ
+迎 VV
+写 VV
+除 VV
+脱 VV
+送 VV NN
+退 VV NN
+逃 VV
+迁 VV
+进 JJ VV NN
+拜 VV
+连 VV
+逝 VV
+远 NR
+领 VV
+运 VV NN
+返 VV NN
+缴 VV NN
+击 VV
+出 AD VV NN
+观 VV
+抬 VV
+见 VV NN
+变 NN
+受 VV NN
+取 VV
+抢 VV
+开 VA VV NN
+发 VV NN
+弄 VV
+凶 NN
+临 VV
+达 VV
+反 VV NN
+押 VV NN
+抽 VV
+罚 VV NN
+请 VV
+中 VV
+丢 VV
+抱 VV
+示 NN
+汇 VV
+抵 VV
+引 VV
+解 VV NN
+遇 VV NN
+诉 LC NT VV NR NN
+飞 VV
+罢 JJ VV NN
+飘 VV
+辞 VV NN
+弹 NR NN
+强 VV
+上 VV
+下 VV
+奔 VV
+抓 VV NN
+短 VV
+输 VV NN
+抗 VV NN
+投 VV
+巡 VV
+搏 VA M
+执 VV
+获 VV NN
+扣 VV
+溺 NN
+转 VV NN
+任 VV
+集 VV NN
+坐 VA JJ VV NR
+扫 NN
+移 VV
+轰 NN
+定 VV NN
+搜 VV NN
+赔 VV NN
+用 VV
+轻 NN
+搬 VV
+生 JJ VV NN
+赠 VV
+赢 VV
+扎 VV
+审 AD JJ CD VV NN
+付 VV
+治 VA
+赴 VV
+扔 JJ VV
+赶 VV
+打 VA JJ VV NN
+走 VV NN
+害 VV NN
+坠 VV
+卖 VV NN
+往 JJ CD VV
+征 VV NN
+关 VV NN
+兴 VV
+待 VV
+养 VV
+摆 VV
+升 VV
+亡 JJ VV NN
+售 VV
+得 VV
+离 VV NN
+入 VV NN
+交 VV NN
+摔 AD
+致 VV
+驻 VV
+留 VV
+滑 NN
+驱 VV
+驶 VV
+卸 VV
+禁 VV NN
+购 VV NN
+成 VV NN
+占 VV
+寻 VV
+贷 VV NN
+争 NN
+注 VV
+翻 VV
+献 VV
+免 VV
+斗 VA M
+烫 NN
+考 VV
+静 VA JJ NR
+烧 VA VV
+办 VV NN
+歼 VV
+回 VV NN
+死 NT VV NN
+住 CD VV NN
+动 VV NN
+助 VV
+娶 VV
+新 JJ NN
+加 VV
+施 VV
+穿 VV
+干 VV
+提 VV NN
+派 VV
+作 NN
+围 M VV NN
+活 NN
+构 VV
+断 AD VV
+居 VV
+破 VV NN
+聊 NN
+流 JJ VV NN
+咬 VV
+伤 VV NN
+查 VV
+推 VV
+炸 VV NN
+聘 VV NN
+联 VV NN
+控 VV SB NN
+接 VV NN
+研 NN
+犯 VV
+塞 NN
+会 AD VV NN
+无 VA NN
+销 VV
+掌 VV
+射 VV
+休 VV NN
+砍 VV NN
+带 VV
+落 VV
+涌 VV
+闭 VV NN
+划 VV
+问 VV NN
+闯 VV
+换 VV
+立 VV NN
+创 VV
+捕 VA VV NN SB
+放 VV NN
+呈 NN
+瘫 VA
+纳 VV NN
+增 VV
+告 VV NN
+捐 VV NN
+改 VV
+判 M VV SB NN
+理 VV NN
+收 VV NN
+毁 VV
+建 AD VV NN
+育 VV
+捅 VV
+有 VE VA VV
+到 VV NR NN
+呛 VA VV NN
+毙 VV NN
+服 VV
+刺 VV NN
+借 VV
+保 NN
+听 NR NN
+结 VV NN
+绑 VV
+救 VV
+给 VV
+行 VV
+调 VV
+偷 VV
+吸 VV
+吹 VV
+谈 VV NN
+谋 VV
+来 VV
+故 VV
+嫁 VV
+挑 NN
+合 VV NN
+敲 VV
+爬 VV
+持 VV
+割 VV
+混 NN
+表 NN
+登 VV
+指 VV NN
+散 VA VV
+添 VV
+供 VV
+做 VV
+补 VV
+重 AD VV NN
+杀 VV NN
+停 VV NN

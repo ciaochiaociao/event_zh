@@ -1,0 +1,275 @@
+认 BV_np/adj
+骗 np/adj_BV BV_verb
+跌 verb_BV
+逮 BV BV_verb
+拨 BV_np/adj BV_verb
+订 BV_verb
+讯 verb_BV np/adj_BV
+疼 BV_np/adj
+降 verb_BV BV_np/adj BV_verb
+讨 verb_BV BV_verb
+乱 verb_BV np/adj_BV
+冲 BV_np/adj BV_verb
+买 BV verb_BV BV_verb
+压 verb_BV np/adj_BV
+撕 BV_np/adj
+拿 BV_verb
+失 np/adj_BV BV_np/adj BV_verb
+追 BV BV_verb
+逼 BV_verb
+撞 BV_verb
+渡 verb_BV
+设 verb_BV BV_verb
+访 BV verb_BV np/adj_BV BV_verb
+归 BV
+论 verb_BV
+跑 BV verb_BV BV_np/adj BV_verb
+选 verb_BV np/adj_BV BV_np/adj
+撤 BV BV_np/adj BV_verb
+拍 BV_np/adj BV_verb
+去 BV verb_BV np/adj_BV BV_np/adj BV_verb
+处 BV
+跨 BV_np/adj
+迎 BV_verb
+写 BV BV_np/adj
+除 verb_BV BV_np/adj
+脱 verb_BV BV_verb
+送 BV verb_BV np/adj_BV BV_np/adj BV_verb
+退 verb_BV BV_np/adj BV_verb
+逃 np/adj_BV BV_np/adj BV_verb
+迁 BV_verb
+进 BV BV_comp verb_BV np/adj_BV BV_np/adj BV_verb
+拜 BV_verb
+连 BV_np/adj
+逝 verb_BV np/adj_BV BV_np/adj
+远 BV_verb
+领 verb_BV
+运 BV verb_BV BV_verb
+返 BV verb_BV np/adj_BV BV_verb
+缴 BV_verb
+击 BV
+出 BV verb_BV np/adj_BV BV_np/adj BV_verb
+观 np/adj_BV
+抬 BV_np/adj
+见 BV verb_BV np/adj_BV BV_np/adj
+变 np/adj_BV
+受 verb_BV BV_verb
+取 verb_BV BV_np/adj BV_verb
+抢 BV np/adj_BV BV_np/adj BV_verb
+开 BV verb_BV np/adj_BV BV_np/adj BV_verb
+发 BV verb_BV BV_np/adj
+弄 BV_verb
+凶 np/adj_BV
+临 np/adj_BV
+达 verb_BV
+反 BV_np/adj BV_verb
+押 verb_BV np/adj_BV
+抽 BV_verb
+罚 verb_BV BV_np/adj
+请 verb_BV BV_verb
+中 BV
+丢 BV
+抱 BV_verb
+示 verb_BV BV_np/adj
+汇 BV BV_verb
+抵 BV verb_BV BV_verb
+引 verb_BV BV_np/adj BV_verb
+解 BV_np/adj BV_verb
+遇 BV_np/adj BV_verb
+诉 BV verb_BV np/adj_BV BV_np/adj
+飞 BV np/adj_BV BV_np/adj BV_verb
+罢 BV_np/adj BV_verb
+飘 BV_verb
+辞 BV verb_BV np/adj_BV BV_np/adj BV_verb
+弹 np/adj_BV
+强 BV_np/adj
+上 BV
+下 BV
+奔 BV_verb
+抓 BV BV_verb
+短 verb_BV
+输 verb_BV BV_verb
+抗 np/adj_BV BV_np/adj BV_verb
+投 BV_np/adj BV_verb
+巡 BV_np/adj
+搏 BV_verb
+执 BV_np/adj
+获 BV verb_BV np/adj_BV BV_np/adj
+扣 BV_verb
+溺 BV_verb
+转 BV_np/adj BV_verb
+任 BV
+集 verb_BV BV_verb
+坐 verb_BV BV_np/adj
+扫 BV_np/adj
+移 np/adj_BV BV_verb
+轰 BV_verb
+定 BV_comp verb_BV np/adj_BV BV_np/adj
+搜 BV_verb
+赔 BV_np/adj
+用 np/adj_BV
+轻 BV_verb
+搬 BV_verb
+生 verb_BV np/adj_BV BV_np/adj
+赠 verb_BV
+赢 BV_np/adj
+扎 BV
+审 BV verb_BV np/adj_BV BV_verb
+付 np/adj_BV
+治 np/adj_BV
+赴 BV verb_BV BV_np/adj
+扔 BV BV_verb
+赶 BV_np/adj BV_verb
+打 BV verb_BV np/adj_BV BV_np/adj BV_verb
+走 BV BV_np/adj BV_verb
+害 verb_BV np/adj_BV
+坠 BV_verb
+卖 verb_BV BV_verb
+往 verb_BV np/adj_BV BV_verb
+征 BV_verb
+关 BV BV_np/adj BV_verb
+兴 BV_verb
+待 verb_BV np/adj_BV
+养 verb_BV
+摆 BV_np/adj BV_verb
+升 BV verb_BV BV_np/adj
+亡 BV verb_BV np/adj_BV
+售 BV verb_BV BV_verb
+得 BV
+离 BV verb_BV BV_np/adj BV_verb
+入 BV verb_BV np/adj_BV BV_np/adj
+交 BV_np/adj BV_verb
+摔 BV_verb
+致 BV_np/adj BV_verb
+驻 verb_BV
+留 verb_BV np/adj_BV BV_np/adj
+滑 BV_verb
+驱 BV BV_np/adj
+驶 BV
+卸 BV_np/adj
+禁 np/adj_BV
+购 BV verb_BV np/adj_BV BV_np/adj BV_verb
+成 BV_comp verb_BV np/adj_BV BV_np/adj BV_verb
+占 verb_BV BV_verb
+寻 BV_verb
+贷 verb_BV BV_np/adj
+争 verb_BV np/adj_BV
+注 BV_np/adj
+翻 verb_BV
+献 verb_BV
+免 verb_BV np/adj_BV BV_np/adj BV_verb
+斗 verb_BV
+烫 BV_verb
+考 BV_np/adj
+静 BV_verb
+烧 BV verb_BV np/adj_BV BV_verb
+办 BV verb_BV np/adj_BV BV_verb
+歼 BV
+回 BV verb_BV BV_np/adj BV_verb
+死 BV BV_comp verb_BV np/adj_BV BV_np/adj BV_verb
+住 verb_BV np/adj_BV BV_verb
+动 verb_BV BV_np/adj BV_verb
+助 verb_BV
+娶 BV verb_BV
+新 BV_np/adj BV_verb
+加 verb_BV BV_verb
+施 BV_verb
+穿 verb_BV
+干 BV_np/adj
+提 BV_np/adj BV_verb
+派 verb_BV BV_verb
+作 BV_np/adj
+围 BV_np/adj BV_verb
+活 BV_verb
+构 BV_verb
+断 verb_BV BV_np/adj
+居 verb_BV
+破 verb_BV BV_np/adj
+聊 BV_np/adj
+流 verb_BV BV_verb
+咬 BV
+伤 BV verb_BV np/adj_BV BV_np/adj BV_verb
+查 BV_verb
+推 BV_verb
+炸 BV verb_BV np/adj_BV BV_np/adj BV_verb
+聘 verb_BV BV_verb
+联 BV_np/adj
+控 BV verb_BV np/adj_BV BV_np/adj BV_verb
+接 BV_np/adj BV_verb
+研 BV_verb
+犯 BV np/adj_BV
+塞 BV_verb
+会 verb_BV np/adj_BV BV_np/adj BV_verb
+无 BV_np/adj
+销 verb_BV
+掌 verb_BV
+射 BV
+休 verb_BV BV_np/adj
+砍 BV BV_np/adj BV_verb
+带 BV_np/adj BV_verb
+落 verb_BV BV_np/adj BV_verb
+涌 BV_verb
+闭 verb_BV np/adj_BV BV_np/adj
+划 BV_verb
+问 verb_BV np/adj_BV
+闯 BV_verb
+换 BV verb_BV
+立 verb_BV
+创 verb_BV BV_verb
+捕 BV verb_BV np/adj_BV
+放 verb_BV np/adj_BV BV_verb
+呈 verb_BV
+瘫 BV_np/adj
+纳 verb_BV
+增 BV_verb
+告 BV verb_BV BV_np/adj BV_verb
+捐 BV np/adj_BV BV_np/adj BV_verb
+改 BV_verb
+判 BV verb_BV np/adj_BV BV_np/adj BV_verb
+理 verb_BV
+收 verb_BV np/adj_BV BV_verb
+毁 verb_BV
+建 verb_BV np/adj_BV BV_np/adj BV_verb
+育 BV
+捅 BV
+有 np/adj_BV BV_np/adj
+到 BV verb_BV np/adj_BV BV_np/adj BV_verb
+呛 BV_verb
+毙 BV verb_BV np/adj_BV
+服 BV_np/adj
+刺 BV np/adj_BV BV_verb
+借 BV
+保 BV_np/adj
+听 BV_np/adj BV_verb
+结 BV_np/adj
+绑 verb_BV
+救 BV_np/adj BV_verb
+给 BV verb_BV
+行 BV
+调 BV_verb
+偷 BV BV_verb
+吸 BV_verb
+吹 BV_verb
+谈 verb_BV np/adj_BV BV_np/adj BV_verb
+谋 BV_verb
+来 BV
+故 BV
+嫁 BV
+挑 BV_np/adj
+合 BV_np/adj
+敲 BV_verb
+爬 BV
+持 np/adj_BV
+割 BV_np/adj
+混 BV_np/adj
+表 BV_verb
+登 BV_np/adj
+指 BV_verb
+散 verb_BV np/adj_BV
+添 BV
+供 verb_BV
+做 BV
+补 BV_np/adj
+重 BV_np/adj BV_verb
+杀 BV verb_BV np/adj_BV BV_verb
+停 BV_np/adj

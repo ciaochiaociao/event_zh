@@ -1,0 +1,116 @@
+SinoCoreferencer: An End-to-End Chinese Event Coreference Resolver
+
+About SinoCoreferencer
+-----------------------------------
+	SinoCoreferencer is an end-to-end Chinese event coreference resolver.
+Given raw document(s) written in Chinese, it finally produces event coreference chains within each document.
+Additional, it also outputs some by-products: (1) entity mentions; (2) semantic type & subtype of entity mentions;
+(3) time and value expressions; (4) entity coreference chains; (5) events including triggers, trigger type, arguments and arguments' role;
+and (6) the polarity, modality, genericity and tense of the events.
+
+SinoCoreferencer is developed based on ACE2005 corpus.
+For details about the entity and events in ACE2005 corpus, please refer to 
+https://www.ldc.upenn.edu/sites/www.ldc.upenn.edu/files/chinese-entities-guidelines-v5.5.pdf
+https://www.ldc.upenn.edu/sites/www.ldc.upenn.edu/files/chinese-events-guidelines-v5.5.1.pdf
+
+Requirements
+-----------------------------------
+Java 1.6+.
+This software package is developed on *nix platform.
+No guarantee on other OS.
+
+
+Installation
+-----------------------------------
+SinoCoreferencer depends on several Natural Language Processing/Machine Learning tools.
+Please download and install these software before running SinoCoreferencer.
+1. Stanford CoreNLP
+Download Stanford CoreNLP package and chinese models from:
+http://nlp.stanford.edu/software/corenlp.shtml
+
+I am currently using Version 3.4.1 that can be downloaded from the following links:
+http://nlp.stanford.edu/software/stanford-corenlp-full-2014-08-27.zip
+http://nlp.stanford.edu/software/stanford-chinese-corenlp-2014-02-24-models.jar
+
+(Unzip stanford-corenlp-full-2014-08-27.zip and put stanford-chinese-corenlp-2014-02-24-models.jar in the resulting folder.)
+
+2. SVM-LIGHT
+SVM-light can be downloaded from:
+http://svmlight.joachims.org/
+http://download.joachims.org/svm_light/current/svm_light.tar.gz
+
+
+3. SVM-MULTIPLECLASS
+SVM-MultipleClass can be found here:
+http://www.cs.cornell.edu/people/tj/svm_light/svm_multiclass.html
+http://download.joachims.org/svm_multiclass/current/svm_multiclass.tar.gz
+
+4. CRF++
+Download CRF++ package the following link and install it.
+http://crfpp.googlecode.com/svn/trunk/doc/index.html
+
+I am currently using Version 0.58.
+
+5. MAX-ENTROPY
+
+Download MAX-ENTROPY toolkit from:
+http://homepages.inf.ed.ac.uk/lzhang10/maxent_toolkit.html
+https://github.com/lzhang10/maxent/archive/master.zip
+   
+After installing above 5 tools, please edit "run.sh" file, specifically line 3-7 to
+fill in correct paths to your installation of above 5 tools. (Please use absolute path)
+
+STANFORD_CORENLP=/users/yzcchen/tool/stanford-corenlp-full-2014-08-27/stanford-corenlp-full-2014-08-27
+CRF=/users/yzcchen/tool/CRF/CRF++-0.58
+SVMMULTI=/shared/mlrdir3/disk1/yzcchen/tool/svm_multiclass
+MAXENT=/users/yzcchen/tool/maxent/bin
+SVMLIGHT=/users/yzcchen/tool/svmlight
+
+NOTE: the path for MAXENT should be the folder which "maxent" file is in. (By default, "maxent" is installed in "/usr/local/bin" folder.)
+
+Input and Output
+-----------------------------------
+
+In the root directory of SinoCoreferencer, you can find a file named "test".
+Edit "test" file, and put the absolute path(s) to your input document(s) in it (one document per line).
+
+There are two test documents in "data/" foler, and you may just put their absolute paths in the "test" file.
+
+NOTE: All input document(s) should be encoded in UTF-8, and also the system default encoding should be UTF-8.
+
+Run:
+./run.sh test
+
+Output:
+If the input file is "doc", SinoCoreferencer will generate the following files:
+doc.xml: Stanford CoreNLP parse resultsb
+doc.type: entity mentions with semantic type & subtype
+doc.value: value expressions
+doc.time: time expressions
+doc.coref.entities: entity mention coreference chains
+doc.trigger: event triggers with event subtype
+doc.arg: event arguments with roles
+doc.attri: the modality, polarity, genericity and tense of the events
+doc.coref.events: event mention coreference chains
+
+(The number X,Y in the output files means the start/end position of the corresponding token in the original input file.)
+
+
+Reference
+-----------------------------------
+Chen Chen, Vincent Ng, SinoCoreferencer: An End-to-End Chinese Event Coreference Resolver,
+Proceedings of the 9th Language Resources and Evaluation Conference (LREC-14), 2014.
+
+Chen Chen, Vincent Ng, Chinese Event Coreference Resolution: Understanding the State of the Art,
+Proceedings of the 6th International Joint Conference on Natural Language Processing (IJCNLP-13), Short Paper, 2013.
+
+Chen Chen, Vincent Ng, Joint Modeling for Chinese Event Extraction with Rich Linguistic Features,
+Proceedings of the 24th International Conference on Computational Linguistics (COLING-12), 2012.
+
+Chen Chen, Vincent Ng, Combining the Best of Two Worlds: A Hybrid Approach to Multilingual Coreference Resolution,
+2012 Joint Conference on Empirical Methods in Natural Language Processing and Computational Natural Language Learning: Proceedings of the Shared Task, (EMNLP-CoNLL Shared Task-12) 2012.
+
+Contact
+-----------------------------------
+Chen Chen <yzcchen@hlt.utdallas.edu>
+Questions or comments are always welcome.

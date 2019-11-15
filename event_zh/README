@@ -1,0 +1,10 @@
+# Trad+Visual program
+This main folder
+1. convert traditional Chinese translate to simplified Chinese
+2. extract event and corefer events by calling SinoCoreferencer (../run.sh test)
+3. convert from simplifed Chinese back to traditional Chinese
+4. visual output in terminal
+The folder includes main.sh, which calls main.py as well, and other subsidiary files:
+
+## usage (-q option is to ignore output):
+./main.sh [FILE_NAME] -q

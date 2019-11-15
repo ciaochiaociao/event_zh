@@ -1,0 +1,35 @@
+
+CC = /workspace/EEtask/myChinese/SinoCoreferencer/maxent/ccdv  gcc ;
+CCFLAGS = -g -O2  -Wall -DNDEBUG -DHAVE_CONFIG_H -fPIC -DBOOST_DISABLE_THREADS ; # no need to link pthread lib
+C++ = /workspace/EEtask/myChinese/SinoCoreferencer/maxent/ccdv  g++ ;
+C++FLAGS = -g -O2  -Wall -DNDEBUG -DHAVE_CONFIG_H -fPIC -DBOOST_DISABLE_THREADS ;
+FORTRAN = /workspace/EEtask/myChinese/SinoCoreferencer/maxent/ccdv  gfortran ;
+FORTRANFLAGS = -g -O2 -fPIC ;
+HAVE_FORTRAN = gfortran ;
+HAVE_GETOPT_LONG = yes ;
+OPTIM = -O3 ;
+FCLIBS =  -L/usr/lib/gcc/x86_64-linux-gnu/5 -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/5/../../.. -lgfortran -lm -lquadmath ;
+LINK = /workspace/EEtask/myChinese/SinoCoreferencer/maxent/ccdv  g++  ;
+LINKLIBS = -lz -lm  $(FCLIBS) ;
+TARGET_DIR = src/opt ;
+HDRS = $(TOP)  ;
+
+PREFIX = /usr/local ;
+BINDIR      = $(PREFIX)/bin ;
+LIBDIR      = $(PREFIX)/lib ;
+MANDIR      = $(PREFIX)/man ;
+STDHDRS     = $(PREFIX)/include ;
+
+actions Fortran
+{
+	$(FORTRAN) $(FORTRANFLAGS) -c -o $(<) $(>)
+}
+
+HOST_OS = linux-gnu ;
+
+if $(OS) != MINGW && $(HOST_OS) = mingw32 # fix for cross-mingw tool chain
+{
+    AR = "$(AR) cru" ;
+    SUFEXE = .exe ;
+}
+
