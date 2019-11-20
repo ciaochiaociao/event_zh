@@ -1,10 +1,25 @@
 # Trad+Visual program
 This main folder
 1. convert traditional Chinese translate to simplified Chinese
-2. extract event and corefer events by calling SinoCoreferencer (../run.sh test)
+2. extract event and corefer events by calling SinoCoreferencer (../run.sh test<a file that lists all files to be processed>)
 3. convert from simplifed Chinese back to traditional Chinese
 4. visual output in terminal
 The folder includes main.sh, which calls main.py as well, and other subsidiary files:
 
 ## usage (-q option is to ignore output):
-./main.sh [FILE_NAME] -q
+./main.sh [FILE_NAME] -q  (old)
+
+# SinoCoreferencer
+
+<path to run.sh> <a file that lists all files to be processed>
+
+ex -
+./run.sh test
+
+
+$EE_HOME/event_zh/SinoCoreferencer/run.sh $EE_HOME/data_dir/filelist
+$RUN_SCRIPT $EE_HOME/data_dir/filelist
+
+or in $EE_HOME (/home/workspace/event_zh)
+
+$RUN_SCRIPT $EE_HOME/data_dir/filelist

@@ -2,7 +2,9 @@
 event_zh/SinoCoreferencer/data/*
 event_zh/SinoCoreferencer/logs/*
 **/*.log
-data_dir/
+data_dir/*
 out_dir/
+**/__pycache__/
 *.json
+!FGC_release_*.json
 *.txt

@@ -26,8 +26,8 @@ echo "Call Stanford CoreNLP..."
 # java -cp "*" -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLP -props $CURRENT_PATH/chiPro -filelist $CURRENT_PATH/$INPUTS
 while read -r line
 do
-	name=$line  # filelist: .../SinoCoreferencer/data/doc, ...
 	set -x
+	name=$line  # filelist: .../SinoCoreferencer/data/doc, ...
 	wget --post-file $name '140.109.19.190:9000/?properties={"outputFormat":"xml","annotators":"tokenize, ssplit, pos, ner, parse", "ssplit.boundaryTokenRegex": "[。]|[!?！？]+", "pipelineLanguage":"zh"}' -O - > $name.xml
 	wget --post-file $name '140.109.19.190:9000/?properties={"outputFormat":"json","annotators":"tokenize, ssplit, pos, ner, parse", "ssplit.boundaryTokenRegex": "[。]|[!?！？]+", "pipelineLanguage":"zh"}' -O - > $name.json
     set +x
@@ -46,8 +46,9 @@ done < $CURRENT_PATH/$INPUTS  # read file .../SinoCoreferencer/test
 # run mention detection
 echo "Run entity mention detection..."
 cd $PROJECT_PATH
+set -x
 java $EVPROPS -cp $PROJECT_PATH/entity.jar MentionDetection/MentionDetectionEndToEnd $CURRENT_PATH/$INPUTS
-
+set +x
 cd $CRF
 # test crf
 while read -r line
