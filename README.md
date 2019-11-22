@@ -37,6 +37,7 @@ or use the below command to set the langauge  whenever a bash is opened:
 # Run
 
 ## Run in docker container
+`docker attach event_zh_container`
 `python3 fgc_extract.py -i input_file -d directory_of_verbose_outputs -o final_output_file`
 
 e.g.

@@ -20,6 +20,50 @@ EVPROPS=-Xmx2g
 set -x
 CURRENT_PATH=${PWD}  # .../workdir
 set +x
+
+# parse paths in $INPUTS
+UNPARSED_PATHS=$(cat $INPUTS)
+eval echo $UNPARSED_PATHS > $INPUTS
+
+# error handling
+cleanup() {
+echo "Cleaning..."
+while read -r line
+do
+	name=$(eval echo $line)  # filelist: .../SinoCoreferencer/data/doc, ...
+	rm $name.arg.svm
+	rm $name.arg.svmpred
+	rm $name.arg.tmp
+	rm $name.evc.pred
+	rm $name.evc.svm
+	rm $name.genericity.fea
+	rm $name.genericity.pred
+	rm $name.md.tmp
+	rm $name.modality.fea
+	rm $name.modality.pred
+	rm $name.polarity.fea
+	rm $name.polarity.pred
+	rm $name.subtype.svmpred
+	rm $name.tense.fea
+	rm $name.tense.pred
+	rm $name.time.crf
+	rm $name.trigger.svm
+	rm $name.trigger.svmpred
+	rm $name.trigger.tmp
+	rm $name.type.svm
+	rm $name.type.svmpred
+	rm $name.type.tmp
+	rm $name.value.crf
+	rm $name.evc
+	rm $name.md.crf
+
+done < $CURRENT_PATH/$INPUTS
+
+echo 'Renaming input files back to the original ...'
+echo $UNPARSED_PATHS > $INPUTS
+}
+trap cleanup EXIT
+
 # call stanford parser
 echo "Call Stanford CoreNLP..."
 # cd $STANFORD_CORENLP
@@ -27,7 +71,7 @@ echo "Call Stanford CoreNLP..."
 while read -r line
 do
 	set -x
-	name=$line  # filelist: .../SinoCoreferencer/data/doc, ...
+	name=$line
 	wget --post-file $name '140.109.19.190:9000/?properties={"outputFormat":"xml","annotators":"tokenize, ssplit, pos, ner, parse", "ssplit.boundaryTokenRegex": "[。]|[!?！？]+", "pipelineLanguage":"zh"}' -O - > $name.xml
 	wget --post-file $name '140.109.19.190:9000/?properties={"outputFormat":"json","annotators":"tokenize, ssplit, pos, ner, parse", "ssplit.boundaryTokenRegex": "[。]|[!?！？]+", "pipelineLanguage":"zh"}' -O - > $name.json
     set +x
@@ -127,7 +171,7 @@ java $EVPROPS -cp $PROJECT_PATH/entity.jar event/attribute/EventAttriEndToEndTes
 cd $MAXENT
 while read -r line
 do
-	name=$line
+	name=$(eval echo $line)  # filelist: .../SinoCoreferencer/data/doc, ...
 	./maxent -p $name.polarity.fea -m $PROJECT_PATH/model/polarityModel --detail -o $name.polarity.pred 1>&-
 	./maxent -p $name.modality.fea -m $PROJECT_PATH/model/modalityModel --detail -o $name.modality.pred 1>&-
 	./maxent -p $name.genericity.fea -m $PROJECT_PATH/model/genericityModel --detail -o $name.genericity.pred 1>&-
@@ -145,43 +189,12 @@ java $EVPROPS -cp $PROJECT_PATH/coref.jar ace/event/coref/MaxEntTestEnd2End $CUR
 cd $SVMLIGHT
 while read -r line
 do
-	name=$line
+	name=$(eval echo $line)  # filelist: .../SinoCoreferencer/data/doc, ...
 	./svm_classify $name.evc.svm $PROJECT_PATH/model/coref.model0 $name.evc.pred 1>&-
 done < $CURRENT_PATH/$INPUTS
 
 cd $PROJECT_PATH
 java $EVPROPS -cp $PROJECT_PATH/coref.jar ace/event/coref/MakeCluster $CURRENT_PATH/$INPUTS 1>&-
 
-echo "Cleaning..."
-while read -r line
-do
-	name=$line
-	rm $name.arg.svm
-	rm $name.arg.svmpred
-	rm $name.arg.tmp
-	rm $name.evc.pred
-	rm $name.evc.svm
-	rm $name.genericity.fea
-	rm $name.genericity.pred
-	rm $name.md.tmp
-	rm $name.modality.fea
-	rm $name.modality.pred
-	rm $name.polarity.fea
-	rm $name.polarity.pred
-	rm $name.subtype.svmpred
-	rm $name.tense.fea
-	rm $name.tense.pred
-	rm $name.time.crf
-	rm $name.trigger.svm
-	rm $name.trigger.svmpred
-	rm $name.trigger.tmp
-	rm $name.type.svm
-	rm $name.type.svmpred
-	rm $name.type.tmp
-	rm $name.value.crf
-	rm $name.evc
-	rm $name.md.crf
-
-done < $CURRENT_PATH/$INPUTS
 
 echo "Congrats! Done!"

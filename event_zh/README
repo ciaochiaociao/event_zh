@@ -11,15 +11,26 @@ The folder includes main.sh, which calls main.py as well, and other subsidiary f
 
 # SinoCoreferencer
 
+## Run file list
+
+You can test if it works by 
+extract-event test
+
 <path to run.sh> <a file that lists all files to be processed>
 
 ex -
 ./run.sh test
 
 
-$EE_HOME/event_zh/SinoCoreferencer/run.sh $EE_HOME/data_dir/filelist
+$SINO_HOME/run.sh $EE_HOME/data_dir/filelist
 $RUN_SCRIPT $EE_HOME/data_dir/filelist
+extract-event $EE_HOME/data_dir/filelist
 
 or in $EE_HOME (/home/workspace/event_zh)
 
 $RUN_SCRIPT $EE_HOME/data_dir/filelist
+extract-event $EE_HOME/data_dir/filelist
+
+## Run one single file
+$SINO_HOME/run_one.sh testdoc
+

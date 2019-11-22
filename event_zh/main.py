@@ -3,16 +3,23 @@ import os
 import sys
 import logging
 import subprocess
+import json
+import shutil
+import glob
+import io
+from typing import List, Tuple
+from opencc import OpenCC
+from lxml import etree
 
 from event_zh.utils import setup_logger, logtime
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 debug_logger = setup_logger('debug', 'debug.log', logging.DEBUG)
 warning_logger = setup_logger('warning', 'warning.log', logging.WARNING)
 info_logger = setup_logger('info', 'info.log', logging.INFO)
 info_logger.addHandler(logging.StreamHandler())
 error_logger = setup_logger('error', 'error.log', logging.ERROR)
-mpath = os.path.dirname(__file__)
+mpath = os.path.dirname(__file__)  # current script directory: .../event_zh/event_zh
 
 ace_types = {
     "Elect": "Personnel",
@@ -32,6 +39,7 @@ ace_types = {
     "Phone-Write": "Contact",
     "Arrest-Jail": "Justice",
     "Meeting": "Contact",
+    "Meet": "Contact",
     "Merge-Org": "Business",
     "Acquit": "Justice",
     "Sue": "Justice",
@@ -50,7 +58,6 @@ ace_types = {
     "Injure": "Life"
 }
 
-from typing import Tuple
 
 def get_tok_sent(char_b: str, char_e: str, xml_file: str) -> Tuple['Element', 'Element', 'Element']:
     """get token and sentence from CoreNLP xml file by char_b and char_e
@@ -63,9 +70,7 @@ def get_tok_sent(char_b: str, char_e: str, xml_file: str) -> Tuple['Element', 'E
     >>> print(''.join([word.text for word in sentence.iter('word')]))
     新北市新庄区陈姓男子常因细故与邻居争吵，今年8月在家门口遇到隔壁庄姓8旬老翁又发生口角，竟持酒瓶砸向老翁，导致对方跌倒伤及脑部，昏迷数日后中枢神经休克死亡，今天被新北地检署依杀人罪起诉。
     """
-    
-    from lxml import etree
-    
+        
     def between():
         pass
     
@@ -83,7 +88,6 @@ def get_tok_sent(char_b: str, char_e: str, xml_file: str) -> Tuple['Element', 'E
 
 
 def parse_line(line):
-    import re
     match = re.match(r'(\d+),(\d+) ([\w-]+) (.*)', line)
     try:
         match = [ match.group(i) for i in range(0,5) ]
@@ -136,9 +140,6 @@ def read_and_output(fpath, input_folder) -> dict:
         doc_arg = f.read().splitlines()
     # print(doc_arg)
 
-
-    from collections import OrderedDict
-
     event_list = []
     event = []
 
@@ -150,24 +151,23 @@ def read_and_output(fpath, input_folder) -> dict:
             event = []
         else:  # lines with the information of event trigger and arguments
             event.append(line)
-    event_list.append(event)
+    
+    if event != []:
+        event_list.append(event)
 
-#     print('event_list:', event_list)
+    print('event_list:', event_list)
 
     event_dict_list = []
-
-    # print("=========================")
 
 
     # generate output
     lastsid = 0
-    id_counter = -1
+    id_counter = 0
     sid_event_count = defaultdict(int)
     
     for evid, event in enumerate(event_list):
-    #     print(event)
+        print('event', event)
         l_min, l_max = float('inf'), float('-inf')
-        idx_list = []
         event_dict = OrderedDict({'abs_id': evid, 'trigger': OrderedDict(), 'args': []})
 
         for idx, arg in enumerate(event):
@@ -189,13 +189,6 @@ def read_and_output(fpath, input_folder) -> dict:
                 event_dict['trigger']['in_tokens'] = [tok.xpath('word/text()') for tok in token_b.xpath('../token')[token_b_int: token_e_int]]
                 event_dict['sid'] = int(sentence.get('id'))
                 event_dict['s_text'] = ''.join([word.text for word in sentence.iter('word')])
-
-#                 if event_dict['sid'] == lastsid:
-#                     id_counter = id_counter + 1
-#                 else:
-#                     id_counter = 0
-#                 lastsid = event_dict['sid']
-
                 id_counter = sid_event_count[event_dict['sid']]
 
                 event_dict['id'] = id_counter
@@ -214,15 +207,11 @@ def read_and_output(fpath, input_folder) -> dict:
                 arg_dict['in_tokens'] = [tok.xpath('word/text()') for tok in token_b.xpath('../token')[token_b_int: token_e_int]]
                 event_dict['args'].append(arg_dict)
 
-            sid_event_count[event_dict['sid']] += 1
-            idx_list.append([s, t])
-            l_min = min(l_min, s)
-            l_max = max(l_max, t)
-    #     print(cc.convert(show_event(l_min, l_max, idx_list, doc)))
+        print('event_dict', event_dict)
+        sid_event_count[event_dict['sid']] += 1
+        print('mid', sid_event_count)
 
         event_dict_list.append(event_dict)
-#         print(len(event_dict_list))
-    #     print("=========================")
 
 
     # sort and add full_id
@@ -236,7 +225,6 @@ def read_and_output(fpath, input_folder) -> dict:
                 ordered_event_dict.update({arg: event_dict[arg]})
 
         # fullid
-        import json
 #         print(json.dumps(event_dict, indent=4))
         fullid = 'D' + str(event_dict['did']) + '-S' + str(event_dict['sid']) + '-EVM' + str(event_dict['id'])
         print(i, fullid)
@@ -251,37 +239,71 @@ def read_and_output(fpath, input_folder) -> dict:
 
 @logtime('info')
 def sino_extract(fpath, save_path=None) -> None:
-
-    from opencc import OpenCC
-    import os
-    import shutil
     
+    temp_filelist_file = 'default_fpath'
+    
+    os.environ['SINO_HOME'] = '/workspace/event_zh/event_zh/SinoCoreferencer'
+    sino_home = os.environ.get('SINO_HOME')
+    
+#     input(sino_home)
+    
+    sino = 'SinoCoreferencer'
+    
+    # --- in sino ---
+    # get filelist file path
+    temp_filelist_file_fullpath = os.path.join(sino_home, temp_filelist_file)
+    
+    # get data_dir (input and output)
+#     with open(temp_filelist_file_fullpath) as f:
+#         data_dir = os.path.dirname(f.read().splitlines()[0])
+        
+    temp_dpath_in_sino = 'data/doc'
+#     temp_dpath_in_sino = data_dir.split(sino + '/')[-1]
+#     input(temp_dpath_in_sino)
+    temp_dpath_in_module = os.path.join(sino, temp_dpath_in_sino)
+    temp_dir_in_module = os.path.dirname(temp_dpath_in_module)
+#     input(temp_dpath_in_module)
+#     input(temp_dir_in_module)
+    cmd = ['bash', 'run.sh', temp_filelist_file]
+#     cmd = ['extract-event', temp_filelist_file]
+    
+    # --- in project ---
     fname = os.path.basename(fpath)
     wd = os.getcwd()
 #     shutil.copy(fpath, os.path.join(mpath, 'SinoCoreferencer/stanford-corenlp-full-2014-08-27', fname))
-    import glob
-    for f in glob.glob(os.path.join(mpath, 'SinoCoreferencer/data/doc*')):
+    
+    # clean old files in sino
+    glob_str = temp_dpath_in_module + '\.*'
+    for f in glob.glob(os.path.join(mpath, glob_str)):
+        print('remove', f)
         os.remove(f)
-    shutil.copy(fpath, os.path.join(mpath, 'SinoCoreferencer/data/doc'))
+        
+    # copy the file to be processed to inside the SinoCoreferencer processing folder
+    print(os.path.join(mpath, temp_dir_in_module))
+    print(os.getcwd())
+    shutil.copy(fpath, os.path.join(mpath, temp_dir_in_module))
 
-    os.chdir(os.path.join(mpath, 'SinoCoreferencer'))
+    # cd to Sino folder
+    os.chdir(sino_home)
     
     try:
-        pipe = subprocess.Popen(['bash', 'run.sh', 'test'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        # extract
+        pipe = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
                 
         stdout, stderr = pipe.communicate(timeout=900)  # if the process is not finished in 15 mins, timeout
 
         debug_logger.debug(stderr)
         info_logger.info(stdout)
-
+        
+        # move output files outside the SinoCoreferencer to the project level
         if save_path is not None:
-            shutil.move('data/doc.coref.entities', os.path.join(save_path, fname + '.coref.entities'))
-            shutil.move('data/doc.coref.events', os.path.join(save_path, fname + '.coref.events'))
-            shutil.move('data/doc.arg', os.path.join(save_path, fname + '.arg'))
-            shutil.move('data/doc.xml', os.path.join(save_path, fname + '.xml'))
-            shutil.move('data/doc.time', os.path.join(save_path, fname + '.time'))
-            shutil.move('data/doc.value', os.path.join(save_path, fname + '.value'))
-            shutil.move('data/doc.type', os.path.join(save_path, fname + '.type'))
+            shutil.move(temp_dpath_in_sino + '.coref.entities', os.path.join(save_path, fname + '.coref.entities'))
+            shutil.move(temp_dpath_in_sino + '.coref.events', os.path.join(save_path, fname + '.coref.events'))
+            shutil.move(temp_dpath_in_sino + '.arg', os.path.join(save_path, fname + '.arg'))
+            shutil.move(temp_dpath_in_sino + '.xml', os.path.join(save_path, fname + '.xml'))
+            shutil.move(temp_dpath_in_sino + '.time', os.path.join(save_path, fname + '.time'))
+            shutil.move(temp_dpath_in_sino + '.value', os.path.join(save_path, fname + '.value'))
+            shutil.move(temp_dpath_in_sino + '.type', os.path.join(save_path, fname + '.type'))
 
     except subprocess.CalledProcessError:
         error_logger.error('Event Extraction Failed - file {}'.format(fname))
@@ -293,19 +315,282 @@ def sino_extract(fpath, save_path=None) -> None:
         error_logger.error('Other Exception in Event Extraction raised - file {} [{} - {}]'.format(fname, sys.exc_info()[0], sys.exc_info()[1]))
         raise
     finally:
-        os.chdir(wd)
+        os.chdir(wd)  # cd back
 
     return
 
-def extract(fpath, save_path=None) -> dict:
+
+@logtime('info')
+def sino_extract_one(fname, save_path=None, timeout=300) -> None:
+    """
+    fname: could be absolute path or relative path
+    save_path: the folder to save the output files, could also be either relative or absolute
+    timeout: timeout value of run SinoCoreferencer in seconds
+    """
+    os.environ['SINO_HOME'] = '/workspace/event_zh/event_zh/SinoCoreferencer'
+
+    sino_home = os.environ['SINO_HOME']
+    print(sino_home)
+    fname_abs = os.path.abspath(fname)
+    fname_base = os.path.basename(fname_abs)
+    save_path = os.path.abspath(save_path)
+    print(fname_abs)
+    print(fname_base)
+    
+    wd = os.getcwd()
+    
+    # cd to Sino folder
+    print('cd to SinoCoreferencer folder')
+    os.chdir(sino_home)
+    
+    # clean old files in sino before copying
+    glob_str = fname_base + '*'
+    for f in glob.glob(glob_str):
+        print('remove', f)
+        os.remove(f)
+        
+    # copy the file to be processed to inside the SinoCoreferencer processing folder
+    shutil.copy(fname_abs, sino_home)
+
+    # run shell script
+    copied_fname_abs = os.path.abspath(fname_base)
+    print(fname_abs, 'copied to', copied_fname_abs)
+    
+    cmd = ['bash', 'run_one.sh', copied_fname_abs]  # actually, run_on.sh could take relative or absolute path
+
+    try:
+        # extract
+        pipe = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+                
+        stdout, stderr = pipe.communicate(timeout=timeout)  # if the process is not finished in 15 mins, timeout
+
+        # logging
+        debug_logger.debug(stderr)
+        info_logger.info(stdout)
+        
+        # move output files outside the SinoCoreferencer to the project level
+        if save_path is not None:
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
+            shutil.move(copied_fname_abs + '.coref.entities', os.path.join(save_path, fname_base + '.coref.entities'))
+            shutil.move(copied_fname_abs + '.coref.events', os.path.join(save_path, fname_base + '.coref.events'))
+            shutil.move(copied_fname_abs + '.arg', os.path.join(save_path, fname_base + '.arg'))
+            shutil.move(copied_fname_abs + '.xml', os.path.join(save_path, fname_base + '.xml'))
+            shutil.move(copied_fname_abs + '.json', os.path.join(save_path, fname_base + '.json'))
+            shutil.move(copied_fname_abs + '.time', os.path.join(save_path, fname_base + '.time'))
+            shutil.move(copied_fname_abs + '.value', os.path.join(save_path, fname_base + '.value'))
+            shutil.move(copied_fname_abs + '.type', os.path.join(save_path, fname_base + '.type'))
+            shutil.move(copied_fname_abs + '.attri', os.path.join(save_path, fname_base + '.attri'))
+            shutil.move(copied_fname_abs + '.trigger', os.path.join(save_path, fname_base + '.trigger'))
+        else:
+            shutil.move(copied_fname_abs + '.coref.entities', fname_abs + '.coref.entities')
+            shutil.move(copied_fname_abs + '.coref.events', fname_abs + '.coref.events')
+            shutil.move(copied_fname_abs + '.arg', fname_abs + '.arg')
+            shutil.move(copied_fname_abs + '.xml', fname_abs + '.xml')
+            shutil.move(copied_fname_abs + '.json', fname_abs + '.json')
+            shutil.move(copied_fname_abs + '.time', fname_abs + '.time')
+            shutil.move(copied_fname_abs + '.value', fname_abs + '.value')
+            shutil.move(copied_fname_abs + '.type', fname_abs + '.type')
+            shutil.move(copied_fname_abs + '.attri', fname_abs + '.attri')
+            shutil.move(copied_fname_abs + '.trigger', fname_abs + '.trigger')
+
+    except subprocess.CalledProcessError:
+        error_logger.error('Event Extraction Failed - file {}'.format(fname))
+        raise
+    except subprocess.TimeoutExpired:
+        error_logger.error('Event Extraction Timeout Expired (over 15 mins) - file {}'.format(fname))
+        raise
+    except:
+        error_logger.error('Other Exception in Event Extraction raised - file {} [{} - {}]'.format(fname, sys.exc_info()[0], sys.exc_info()[1]))
+        raise
+    finally:
+        os.chdir(wd)  # cd back
+
+    return
+
+
+def cckd2fgc(ee_output: dict) -> dict:
+    import copy
+    result = copy.deepcopy(ee_output)
+    
+    r = tuple(result.items())
+    for fullid, d in r:
+        d.pop('id')
+#         d.pop('sid')
+        d.pop('did')
+#         d.pop('s_text')
+        
+#         # change id
+#         def old2newid(oldid):
+#             ids = oldid.rsplit('-', 2)
+            
+#             mid = list(filter(len, re.split(r'(\d+)', ids[-1])))
+#             assert len(mid) == 2
+#             mid[0] = 'M'
+#             mid = ''.join(mid)
+            
+#             return '-'.join(ids[:-1] + [mid])
+        
+#         newid = old2newid(fullid)
+#         result[newid] = result.pop(fullid)
+        
+        # remove some trigger keys
+        d['trigger'].pop('token_b')
+        d['trigger'].pop('token_e')
+        d['trigger'].pop('in_tokens')
+        d['trigger']['start'] = d['trigger'].pop('char_b')
+        d['trigger']['end'] = d['trigger'].pop('char_e')
+        
+        for arg in d['args']:
+            arg.pop('token_b')
+            arg.pop('token_e')
+            arg.pop('in_tokens')
+            arg['start'] = arg.pop('char_b')
+            arg['end'] = arg.pop('char_e')
+    
+    return result
+  
+# def get_corefs_from_eecoref_and_md(fh_eecoref, fh_md):
+#     """
+#     >>> with open('data_dir/008.coref.events') as fh_eecoref, \ 
+#     ... open('data'):
+#         get_corefs_from_eecoref_and_md(fh_eecoref)
+#     """
+#     corefs_out = OrderedDict()
+    
+#     # parse coref format
+#     try:
+#         corefs = parse_coref_format(fh_eecoref)
+
+#     except FileNotFoundError as e:
+#         CorefLogger.info(e)
+    
+#     # get fullid from char_b, char_e
+#     md_json = json.load(fh_md) 
+
+#     evid = 0
+#     for coref in corefs:
+#         if len(coref) > 1:  # only store the coreference chain that has more than two mentions
+#             coref_out = []
+#             for evm in coref:
+#                 fullid = get_fullid_from_char_be(*evm[0], fname, md_json)
+#                 if fullid is None:
+#                     CorefLogger.warning('Can not get fullid of mentions' + repr(evm) + ' in ' + str(fname) + '.coref.events: Probably *.md.json do not correctly get all mentions in *.arg')
+#                     CorefLogger.warning(coref)
+#                 else:
+#                     coref_out.append(fullid)
+#             if len(coref_out) > 1:  # only store the coreference chain that has more than two mentions
+#                 corefs_out.update({'D' + str(fname) + '-EV' + str(evid): coref_out})
+#                 evid += 1
+                
+#     return corefs_out
+
+
+def get_corefs_from_eecoref_and_md(fh_eecoref, fh_md, fname):
+    """
+    >>> with open('data_dir/008.coref.events') as fh_eecoref, \ 
+    ... open('data'):
+        get_corefs_from_eecoref_and_md(fh_eecoref)
+    """
+    corefs_out = OrderedDict()
+    
+    # parse coref format
+    try:
+        corefs = parse_coref_format(fh_eecoref)
+
+    except FileNotFoundError as e:
+        CorefLogger.info(e)
+    
+    # get fullid from char_b, char_e
+    md_json = json.load(fh_md) 
+
+    evid = 0
+    for coref in corefs:
+        if len(coref) > 1:  # only store the coreference chain that has more than two mentions
+            coref_out = []
+            for evm in coref:
+                fullid = get_fullid_from_char_be(*evm[0], fname, md_json)
+                if fullid is None:
+                    CorefLogger.warning('Can not get fullid of mentions' + repr(evm) + ' in ' + str(fname) + '.coref.events: Probably *.md.json do not correctly get all mentions in *.arg')
+                    CorefLogger.warning(coref)
+                else:
+                    coref_out.append(fullid)
+            if len(coref_out) > 1:  # only store the coreference chain that has more than two mentions
+                corefs_out.update({'D' + str(fname) + '-EV' + str(evid): coref_out})
+                evid += 1
+                
+    return corefs_out
+
+
+def get_fullid_from_char_be(char_b, char_e, did, md_json) -> str:
+    """
+    >>> md_out_path = 'outputs/' + str(0) + '.md.json'
+    >>> with open(md_out_path) as f:
+    ...     md_json = json.load(f)
+    ...     fullid = get_fullid_from_char_be(42, 43, 0, md_json)
+    >>> fullid
+    'D0-S1-EVM0'
+    """
+    # navigate to *.md.json trigger -> char_b, char_e,
+    # which is optimized for slicing, so needed to add 1 to match the event extraction package
+    try:
+        for k, v in md_json.items():
+            if 'D' + str(did) in k and v['trigger']['char_b'] == char_b and v['trigger']['char_e'] == char_e + 1:
+                return k
+    except KeyError:
+        for k, v in md_json.items():
+            if 'D' + str(did) in k and v['trigger']['start'] == char_b and v['trigger']['end'] == char_e + 1:
+                return k
+
+
+def parse_coref_format(fh) -> List[List[Tuple]]:
+    """
+    >>> with open('data_dir/001.coref.events') as f:
+    >>> corefs = parse_coref_format(f)
+    >>> print(corefs)
+    [[((345, 345), 'Transport', '入')]]
+    """
+    COREF_SEP = "============"    
+    corefs = []
+    coref = []
+    for line in fh:
+        if line.strip() == COREF_SEP:  # Create a new coref instance
+            corefs.append(coref)
+            coref = []
+        elif line.strip() == "":  # Nothing
+            pass
+        else:
+            data = line.strip().split(' ')
+            assert (len(data), len(data[0].split(','))) == (3, 2), (len(data), len(data[0]))
+            range_, type_, text = data
+            char_b, char_e = range_.split(',')
+            
+            coref.append([(int(char_b), int(char_e)), type_, text])
+            
+    return corefs
+
+
+def extract(fpath, save_path=None, fmt='cckd') -> dict:
+    """1. extract event and save to save_path. 2. Also parse to self-defined json format and returns it.
+    >>> print(extract('../event_zh/testdoc', '../event_zh/data_dir'))
+    """
+    
+    if save_path is None:
+        save_path = os.path.abspath(fpath)
+    
+    save_path = os.path.abspath(save_path)
     info_logger.info('>>>>> Extracting {}'.format(fpath))
     fpath_full = os.path.abspath(fpath)
     try:
-        sino_extract(fpath, os.path.abspath(save_path))
+#         sino_extract(fpath, os.path.abspath(save_path))
+        sino_extract_one(fpath_full, save_path)
         try:
+            print('fpath_full', fpath_full)
+            print('save_path', save_path)
             output = read_and_output(fpath_full, save_path)
             info_logger.info('Finished!')
         except KeyError:
+            raise
             info_logger.info('{}: No events!'.format(fpath_full))
             output = {}
     except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
@@ -313,19 +598,60 @@ def extract(fpath, save_path=None) -> dict:
         output = {}
     except:
         raise
-        
+    
+    if fmt == 'fgc':
+        output = cckd2fgc(output)
+
     return output
 
 
-def extract_to_json(fpath: str, save_path) -> None:
+def extract_to_json(fpath: str, save_path=None, fmt='cckd') -> str:
     
-    output = extract(fpath, save_path)
+    if save_path is None:
+        os.path.abspath(fpath)
     
-    import json
-    import os
-#     print(json.dumps(event_dict_list, indent=4, ensure_ascii=False))
-#     print(json.dumps(output, indent=4, ensure_ascii=False))
+    output = extract(fpath, save_path, fmt)
     with open(os.path.join(save_path, os.path.basename(fpath) + '.md.json'), 'w') as f:
-        json.dump(output, f)
+        json.dump(output, f, ensure_ascii=False)
         
-    return output
+    return json.dumps(output, indent=4, ensure_ascii=False)
+
+
+def extract_and_coref(fname, save_path, fmt='cckd', to_json=False):  # TODO: this should be in read_and_output function instead
+    """extract events from `fname`, which saves to `save_path` with format `fmt` 
+    return 
+    >>> extract_and_coref('test2', 'data_dir')
+    >>> extract_and_coref('test2', 'data_dir', fmt='fgc', to_json=True)
+    """
+    fname = os.path.abspath(fname)
+    fname_base = os.path.basename(fname)
+    save_path = os.path.abspath(save_path)
+    ee_md_dict = extract(fname, save_path, fmt=fmt)
+    ee_md_dict_dumps = json.dumps(ee_md_dict, ensure_ascii=False)
+    
+    fh_md = io.StringIO(ee_md_dict_dumps)
+    
+    # parse corefs format
+    try:
+        with open(os.path.join(save_path, fname_base + '.coref.events')) as fh_eecoref:
+            corefs_dict = get_corefs_from_eecoref_and_md(fh_eecoref, fh_md, fname_base)
+    except FileNotFoundError:
+        raise
+        corefs_dict = {}
+        
+    result_json = {'events':ee_md_dict, 'corefs': corefs_dict}
+    
+    if to_json:
+        with open(fname + '.ec.json', 'w') as f:
+            json.dump(result_json, f, ensure_ascii=False)
+    
+    return result_json
+
+
+if __name__ == '__main__':
+    
+    #test
+#     sino_extract_one('../event_zh/testdoc', '../event_zh/data_dir')
+    print(extract_and_coref('../event_zh/testdoc', '../event_zh/data_dir', fmt='fgc', to_json=True))
+#     print(extract_to_json('../event_zh/testdoc', '../event_zh/data_dir'))
+#     print(extract_to_json('../event_zh/testdoc', '../event_zh/data_dir', fmt='fgc'))
