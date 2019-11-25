@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -26,6 +26,7 @@ cleanup() {
 echo "Cleaning..."
 
 # name=$(eval echo $line)  # filelist: .../SinoCoreferencer/data/doc, ...
+rm $name
 rm $name.arg.svm
 rm $name.arg.svmpred
 rm $name.arg.tmp
@@ -53,17 +54,20 @@ rm $name.evc
 rm $name.md.crf
 
 }
-# trap cleanup EXIT
+trap cleanup EXIT
 
+#CORENLP_IP="http://140.109.19.190:9000"
 
-
+set -x
+CORENLP_FULLURL="$CORENLP_IP/?properties={\"outputFormat\":\"xml\",\"annotators\":\"tokenize,ssplit,pos,ner,parse\",\"ssplit.boundaryTokenRegex\":\"[。]|[!?！？]+\",\"pipelineLanguage\":\"zh\"}"
+set +x
 # call stanford parser
 echo "Call Stanford CoreNLP..."
 
 set -x
 # name=$1 # read file .../SinoCoreferencer/data/doc
-wget --post-file $name '140.109.19.190:9000/?properties={"outputFormat":"xml","annotators":"tokenize, ssplit, pos, ner, parse", "ssplit.boundaryTokenRegex": "[。]|[!?！？]+", "pipelineLanguage":"zh"}' -O - > $name.xml
-wget --post-file $name '140.109.19.190:9000/?properties={"outputFormat":"json","annotators":"tokenize, ssplit, pos, ner, parse", "ssplit.boundaryTokenRegex": "[。]|[!?！？]+", "pipelineLanguage":"zh"}' -O - > $name.json
+wget --post-file $name ${CORENLP_FULLURL} -O - > $name.xml
+wget --post-file $name ${CORENLP_FULLURL} -O - > $name.json
 set +x
 
 # run mention detection
