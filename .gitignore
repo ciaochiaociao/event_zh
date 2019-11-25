@@ -11,3 +11,5 @@ out_dir/
 FGC_data/
 **/test_data/
 **/fgc_data_out/
+event_zh/SinoCoreferencer/tempfile*
+tempfile

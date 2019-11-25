@@ -14,11 +14,11 @@ from lxml import etree
 from event_zh.utils import setup_logger, logtime
 from collections import defaultdict, OrderedDict
 
-debug_logger = setup_logger('debug', 'debug.log', logging.DEBUG)
-warning_logger = setup_logger('warning', 'warning.log', logging.WARNING)
-info_logger = setup_logger('info', 'info.log', logging.INFO)
+debug_logger = setup_logger('debug', 'logs/debug.log', logging.DEBUG)
+warning_logger = setup_logger('warning', 'logs/warning.log', logging.WARNING)
+info_logger = setup_logger('info', 'logs/info.log', logging.INFO)
 info_logger.addHandler(logging.StreamHandler())
-error_logger = setup_logger('error', 'error.log', logging.ERROR)
+error_logger = setup_logger('error', 'logs/error.log', logging.ERROR)
 mpath = os.path.dirname(__file__)  # current script directory: .../event_zh/event_zh
 
 ace_types = {
@@ -617,7 +617,7 @@ def extract_to_json(fpath: str, save_path=None, fmt='cckd') -> str:
     return json.dumps(output, indent=4, ensure_ascii=False)
 
 
-def extract_and_coref(fname, save_path, fmt='cckd', to_json=False):  # TODO: this should be in read_and_output function instead
+def extract_and_coref(fname, save_path, fmt='cckd', to_file=False) -> dict:  # TODO: this should be in read_and_output function instead
     """extract events from `fname`, which saves to `save_path` with format `fmt` 
     return 
     >>> extract_and_coref('test2', 'data_dir')
@@ -641,7 +641,7 @@ def extract_and_coref(fname, save_path, fmt='cckd', to_json=False):  # TODO: thi
         
     result_json = {'events':ee_md_dict, 'corefs': corefs_dict}
     
-    if to_json:
+    if to_file:
         with open(fname + '.ec.json', 'w') as f:
             json.dump(result_json, f, ensure_ascii=False)
     
@@ -652,6 +652,6 @@ if __name__ == '__main__':
     
     #test
 #     sino_extract_one('../event_zh/testdoc', '../event_zh/data_dir')
-    print(extract_and_coref('../event_zh/testdoc', '../event_zh/data_dir', fmt='fgc', to_json=True))
+    print(extract_and_coref('../event_zh/testdoc', '../event_zh/data_dir', fmt='fgc', to_file=True))
 #     print(extract_to_json('../event_zh/testdoc', '../event_zh/data_dir'))
 #     print(extract_to_json('../event_zh/testdoc', '../event_zh/data_dir', fmt='fgc'))
