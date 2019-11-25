@@ -24,9 +24,9 @@ EVPROPS=-Xmx2g
 # error handling
 cleanup() {
 echo "Cleaning..."
-
+set +e
 # name=$(eval echo $line)  # filelist: .../SinoCoreferencer/data/doc, ...
-rm $name
+#rm $name
 rm $name.arg.svm
 rm $name.arg.svmpred
 rm $name.arg.tmp
@@ -59,7 +59,9 @@ trap cleanup EXIT
 #CORENLP_IP="http://140.109.19.190:9000"
 
 set -x
-CORENLP_FULLURL="$CORENLP_IP/?properties={\"outputFormat\":\"xml\",\"annotators\":\"tokenize,ssplit,pos,ner,parse\",\"ssplit.boundaryTokenRegex\":\"[。]|[!?！？]+\",\"pipelineLanguage\":\"zh\"}"
+#CORENLP_FULLURL="$CORENLP_IP/?properties={\"outputFormat\":\"xml\",\"annotators\":\"tokenize,ssplit,pos,ner,parse\",\"ssplit.boundaryTokenRegex\":\"[。]|[!?！？]+\",\"pipelineLanguage\":\"zh\"}"
+
+CORENLP_FULLURL=$CORENLP_IP'/?properties={"outputFormat":"xml","annotators":"tokenize,ssplit,pos,ner,parse","ssplit.boundaryTokenRegex":"[。]|[!?！？]+","pipelineLanguage":"zh"}'
 set +x
 # call stanford parser
 echo "Call Stanford CoreNLP..."
