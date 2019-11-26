@@ -7,7 +7,6 @@ out_dir/
 **/__pycache__/
 *.json
 !FGC_release_*.json
-*.txt
 FGC_data/
 **/test_data/
 **/fgc_data_out/
