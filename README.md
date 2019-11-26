@@ -1,4 +1,4 @@
-# event_zh
+# `event_zh`
 
 This package also uses the following paper and its corresponding java source package
 SinoCoreferencer: An End-to-End Chinese Event Coreference Resolver
@@ -8,7 +8,37 @@ http://www.hlt.utdallas.edu/~yzcchen/coref
 # Requirements
 python >= 3.5.2 (3.6, 3.7)
 
-# Setup
+# Setup (0.4) (latest)
+
+Setup steps:
+1. 
+`docker pull ciaochiaociao/cwhsu_event_zh:0.4`
+2.
+`git clone https://github.com/ciaochiaociao/event_zh`
+3.
+`docker run -d --rm -v </path/to/repo>:/workspace/event_zh [-e CORENLP_IP=<hostname:port>] -p 5000:5000 -w /workspace/event_zh --name event_zh_container ciaochiaociao/cwhsu_event_zh:0.3 ./server.py`
+
+## ex0 - Set a corenlp server running in another docker container (default)
+
+Default environment varaible `CORENLP_IP` set to `172.17.0.1`, which is the host ip to access from inside the docker container. Through this, the event extraction inside one container can access the corenlp server running in another docker container on the same host.
+
+```bash
+docker run -d --rm -v /d/event_zh:/workspace/event_zh -p 5000:5000 -w /workspace/event_zh --name event_zh_container ciaochiaociao/cwhsu_event_zh:0.4 ./server.py
+```
+
+is the same as
+
+```bash
+docker run -d --rm -v /d/event_zh:/workspace/event_zh -e CORENLP_IP=172.17.0.1:9000 -p 5000:5000 -w /workspace/event_zh --name event_zh_container ciaochiaociao/cwhsu_event_zh:0.3 ./server.py
+```
+
+## Ex1 - Set a remote corenlp server
+
+```bash
+docker run -d --rm -v /d/event_zh:/workspace/event_zh -e CORENLP_IP=140.109.19.190:9000 -p 5000:5000 -w /workspace/event_zh --name event_zh_container ciaochiaociao/cwhsu_event_zh:0.3 ./server.py
+```
+
+# Setup (0.1) (old version)
 
 ## Docker
 
