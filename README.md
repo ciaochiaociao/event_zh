@@ -16,7 +16,7 @@ Setup steps:
 2.
 `git clone https://github.com/ciaochiaociao/event_zh`
 3.
-`docker run -d --rm -v </path/to/repo>:/workspace/event_zh [-e CORENLP_IP=<hostname:port>] -p 5000:5000 -w /workspace/event_zh --name event_zh_container ciaochiaociao/cwhsu_event_zh:0.3 ./server.py`
+`docker run -d --rm -v </path/to/repo>:/workspace/event_zh [-e CORENLP_IP=<hostname:port>] -p 5000:5000 -w /workspace/event_zh --name event_zh_container ciaochiaociao/cwhsu_event_zh:0.4 ./server.py`
 
 ## ex0 - Set a corenlp server running in another docker container (default)
 
@@ -29,13 +29,30 @@ docker run -d --rm -v /d/event_zh:/workspace/event_zh -p 5000:5000 -w /workspace
 is the same as
 
 ```bash
-docker run -d --rm -v /d/event_zh:/workspace/event_zh -e CORENLP_IP=172.17.0.1:9000 -p 5000:5000 -w /workspace/event_zh --name event_zh_container ciaochiaociao/cwhsu_event_zh:0.3 ./server.py
+docker run -d --rm -v /d/event_zh:/workspace/event_zh -e CORENLP_IP=172.17.0.1:9000 -p 5000:5000 -w /workspace/event_zh --name event_zh_container ciaochiaociao/cwhsu_event_zh:0.4 ./server.py
 ```
 
 ## Ex1 - Set a remote corenlp server
 
 ```bash
-docker run -d --rm -v /d/event_zh:/workspace/event_zh -e CORENLP_IP=140.109.19.190:9000 -p 5000:5000 -w /workspace/event_zh --name event_zh_container ciaochiaociao/cwhsu_event_zh:0.3 ./server.py
+docker run -d --rm -v /d/event_zh:/workspace/event_zh -e CORENLP_IP=140.109.19.190:9000 -p 5000:5000 -w /workspace/event_zh --name event_zh_container ciaochiaociao/cwhsu_event_zh:0.4 ./server.py
+```
+
+## Test
+Run the following in any host
+```
+import requests
+
+
+PARAMS = {'text':'蔡总统抵达位于南部科学工业园区台南园区的台积电晶圆18厂，在厂区大厅短暂发表谈话，随后在台积电董事长刘德音与经济部长沈荣津、行政院政务委员龚明鑫等人陪同进入厂区参访，参访行程未公开。'}
+
+URL = 'http://140.109.19.51:5000/event'
+
+r = requests.get(url = URL, params = PARAMS)
+
+print(r.json())  # return a dictrionary
+
+print(r.text)
 ```
 
 # Setup (0.1) (old version)
