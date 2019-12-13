@@ -16,26 +16,26 @@ Setup steps:
 2.
 `git clone https://github.com/ciaochiaociao/event_zh`
 3.
-`docker run -d --rm -v </path/to/repo>:/workspace/event_zh [-e CORENLP_IP=<hostname:port>] -p 5000:5000 -w /workspace/event_zh --name event_zh_container ciaochiaociao/cwhsu_event_zh:0.4 ./server.py`
+`docker run -d --rm -v </path/to/repo>:/workspace/event_zh [-e CORENLP_IP=<hostname:port>] -p 5000:5000 -w /workspace/event_zh --name event_zh ciaochiaociao/cwhsu_event_zh:0.4 ./server.py`
 
 ## ex0 - Set a corenlp server running in another docker container (default)
 
 Default environment varaible `CORENLP_IP` set to `172.17.0.1`, which is the host ip to access from inside the docker container. Through this, the event extraction inside one container can access the corenlp server running in another docker container on the same host.
 
 ```bash
-docker run -d --rm -v /d/event_zh:/workspace/event_zh -p 5000:5000 -w /workspace/event_zh --name event_zh_container ciaochiaociao/cwhsu_event_zh:0.4 ./server.py
+docker run -d --rm -v /d/event_zh:/workspace/event_zh -p 5000:5000 -w /workspace/event_zh --name event_zh ciaochiaociao/cwhsu_event_zh:0.4 ./server.py
 ```
 
 is the same as
 
 ```bash
-docker run -d --rm -v /d/event_zh:/workspace/event_zh -e CORENLP_IP=172.17.0.1:9000 -p 5000:5000 -w /workspace/event_zh --name event_zh_container ciaochiaociao/cwhsu_event_zh:0.4 ./server.py
+docker run -d --rm -v /d/event_zh:/workspace/event_zh -e CORENLP_IP=172.17.0.1:9000 -p 5000:5000 -w /workspace/event_zh --name event_zh ciaochiaociao/cwhsu_event_zh:0.4 ./server.py
 ```
 
 ## Ex1 - Set a remote corenlp server
 
 ```bash
-docker run -d --rm -v /d/event_zh:/workspace/event_zh -e CORENLP_IP=140.109.19.190:9000 -p 5000:5000 -w /workspace/event_zh --name event_zh_container ciaochiaociao/cwhsu_event_zh:0.4 ./server.py
+docker run -d --rm -v /d/event_zh:/workspace/event_zh -e CORENLP_IP=140.109.19.190:9000 -p 5000:5000 -w /workspace/event_zh --name event_zh ciaochiaociao/cwhsu_event_zh:0.4 ./server.py
 ```
 
 ## Test
@@ -60,7 +60,7 @@ print(r.text)
 ## Docker
 
 `docker pull ciaochiaociao/cwhsu_event_zh:0.1`
-`docker run -it -v ./event_zh:/workspace/event_zh --name event_zh_container ciaochiaociao/cwhsu_event_zh:0.1`
+`docker run -it -v ./event_zh:/workspace/event_zh --name event_zh ciaochiaociao/cwhsu_event_zh:0.1`
 `Ctrl + P, Q` to detach from the current container
 
 ## `C.UTF-8`
@@ -84,7 +84,7 @@ or use the below command to set the langauge  whenever a bash is opened:
 # Run
 
 ## Run in docker container
-`docker attach event_zh_container`
+`docker attach event_zh`
 `python3 fgc_extract.py -i input_file -d directory_of_verbose_outputs -o final_output_file`
 
 e.g.
@@ -92,5 +92,5 @@ e.g.
 `python3 fgc_extract.py -i FGC_release_A.json -d test_jsons -o result.json`
 
 ## Run from oustide the docker container
-`docker exec -e LANG=C.UTF-8 -w /event_zh event_zh_container python3 fgc_extract.py -i FGC_release_A.json -d test_jsons -o result.json`
+`docker exec -e LANG=C.UTF-8 -w /event_zh event_zh python3 fgc_extract.py -i FGC_release_A.json -d test_jsons -o result.json`
 
