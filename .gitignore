@@ -1,7 +1,6 @@
 **/.ipynb_checkpoints/
 event_zh/SinoCoreferencer/data/*
 event_zh/SinoCoreferencer/logs/*
-**/*.log
 data_dir/*
 out_dir/
 **/__pycache__/
