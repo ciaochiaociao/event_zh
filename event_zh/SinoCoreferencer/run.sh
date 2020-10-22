@@ -18,9 +18,8 @@ set -x
 CURRENT_PATH=${PWD}  # .../workdir
 set +x
 
-# parse paths in $INPUTS
-UNPARSED_PATHS=$(cat "$INPUTS")
-eval echo "$UNPARSED_PATHS" > "$INPUTS"
+# copy one for unwanted exit
+cp "$INPUTS" "/tmp/$INPUTS"
 
 # error handling
 cleanup() {
@@ -57,7 +56,7 @@ do
 done < "$CURRENT_PATH/$INPUTS"
 
 echo 'Renaming input files back to the original ...'
-echo "$UNPARSED_PATHS" > "$INPUTS"
+cp "/tmp/$INPUTS" "$INPUTS"
 }
 trap cleanup EXIT
 
