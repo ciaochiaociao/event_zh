@@ -8,10 +8,10 @@ import shutil
 import glob
 import io
 from typing import List, Tuple
-from opencc import OpenCC
 from lxml import etree
+from lxml.etree import Element
 
-from event_zh.utils import setup_logger, logtime
+from event_zh.utils import logtime
 from collections import defaultdict, OrderedDict
 
 debug_logger = setup_logger('debug', 'logs/debug.log', logging.DEBUG)
@@ -59,9 +59,9 @@ ace_types = {
 }
 
 
-def get_tok_sent(char_b: str, char_e: str, xml_file: str) -> Tuple['Element', 'Element', 'Element']:
+def get_tok_sent(char_b: str, char_e: str, xml_file: str) -> Tuple[Element, Element, Element]:
     """get token and sentence from CoreNLP xml file by char_b and char_e
-    >>> token_b, token_e, sentence = get_tok_sent(33, 34, 'test.xml')
+    >>> token_b, token_e, sentence = get_tok_sent('33', '34', 'test.xml')
     >>> tid_b = token_b.attrib.get('id')
     >>> tid_e = token_e.attrib.get('id')
     >>> sid = sentence.attrib.get('id')
@@ -70,16 +70,14 @@ def get_tok_sent(char_b: str, char_e: str, xml_file: str) -> Tuple['Element', 'E
     >>> print(''.join([word.text for word in sentence.iter('word')]))
     新北市新庄区陈姓男子常因细故与邻居争吵，今年8月在家门口遇到隔壁庄姓8旬老翁又发生口角，竟持酒瓶砸向老翁，导致对方跌倒伤及脑部，昏迷数日后中枢神经休克死亡，今天被新北地检署依杀人罪起诉。
     """
-        
-    def between():
-        pass
     
     with open(xml_file, 'r') as f:
         tree = etree.parse(f)
     
     sentence = tree.xpath(".//token[CharacterOffsetBegin<=" + str(char_b) + " and CharacterOffsetEnd>" + str(char_b) + "]/../..")[0]
     sentence2 = tree.xpath(".//token[CharacterOffsetBegin<" + str(char_e) + " and CharacterOffsetEnd>=" + str(char_e) + "]/../..")[0]
-    assert sentence == sentence2, 'char_b {} is in sentence {} and char_e {} is in sentence {}'.format(str(char_b), sentence.attrib.get('id'), str(char_e), sentence2.attrib.get('id') )
+    assert sentence == sentence2, 'char_b {} is in sentence {} and char_e {} is in sentence {}'.format(
+        str(char_b), sentence.attrib.get('id'), str(char_e), sentence2.attrib.get('id'))
             
     token_b = tree.xpath(".//token[CharacterOffsetBegin<=" + str(char_b) + " and CharacterOffsetEnd>" + str(char_b) + "]")[0]
     token_e = tree.xpath(".//token[CharacterOffsetBegin<" + str(char_e) + " and CharacterOffsetEnd>=" + str(char_e) + "]")[0]
@@ -90,7 +88,7 @@ def get_tok_sent(char_b: str, char_e: str, xml_file: str) -> Tuple['Element', 'E
 def parse_line(line):
     match = re.match(r'(\d+),(\d+) ([\w-]+) (.*)', line)
     try:
-        match = [ match.group(i) for i in range(0,5) ]
+        match = [match.group(i) for i in range(0, 5)]
         match[1], match[2] = int(match[1]), int(match[2])
     except AttributeError:
         warning_logger.warn('The input file might not have a correct format, which should be like "59,63 Injure 清理伤口"')
@@ -102,7 +100,7 @@ def bold(text):
     >>> print(bold('Y') + 'N')
     \033[1mY\033[0mN
     """
-    return ('\033[1m' + text + '\033[0m')
+    return '\033[1m' + text + '\033[0m'
 
 
 def show_event(s, t, idx_list, d):
@@ -112,7 +110,7 @@ def show_event(s, t, idx_list, d):
     else:
         win = 0
         
-    for tok in idx_list: # make bold ('\033[1m') and red ('\033[91m')
+    for tok in idx_list:  # make bold ('\033[1m') and red ('\033[91m')
         d[tok[0]] = '\033[91m' + '\033[1m' + d[tok[0]]
         d[tok[1]] = d[tok[1]] + '\033[0m'
     if s < 0 or t >= len(d):
@@ -124,7 +122,7 @@ def show_event(s, t, idx_list, d):
     elif s < win:
         return ''.join(d[0: t+1+win])
     else:
-        return ''.join(d[s-win: ])
+        return ''.join(d[s-win:])
 
 
 @logtime('info')
@@ -138,7 +136,6 @@ def read_and_output(fpath, input_folder) -> dict:
 
     with open(ee_out_fpath, 'r') as f:
         doc_arg = f.read().splitlines()
-    # print(doc_arg)
 
     event_list = []
     event = []
@@ -146,23 +143,20 @@ def read_and_output(fpath, input_folder) -> dict:
     # parse event
     for line in doc_arg:
         if line == "==================":  # start of an event
-            if event != []:
+            if event:
                 event_list.append(event)
             event = []
         else:  # lines with the information of event trigger and arguments
             event.append(line)
     
-    if event != []:
+    if event:
         event_list.append(event)
 
     print('event_list:', event_list)
 
     event_dict_list = []
 
-
     # generate output
-    lastsid = 0
-    id_counter = 0
     sid_event_count = defaultdict(int)
     
     for evid, event in enumerate(event_list):
@@ -172,8 +166,6 @@ def read_and_output(fpath, input_folder) -> dict:
 
         for idx, arg in enumerate(event):
             _, s, t, type_, cn_word = parse_line(arg)
-#             print('line:', arg)
-#             print('parsed:', _, s, t, type_, cn_word)
             if idx == 0:  # trigger
                 event_dict['did'] = did
                 event_dict['type'] = ace_types[type_]
@@ -183,7 +175,7 @@ def read_and_output(fpath, input_folder) -> dict:
                 event_dict['trigger']['char_e'] = t + 1  # substring: string[s:t] , last word: string[t+1]
                 token_b, token_e, sentence = get_tok_sent(s, t + 1, corenlp_xml_path)
                 token_b_int, token_e_int = int(token_b.attrib['id']), int(token_e.attrib['id']) + 1
-                token_b_int, token_e_int = token_b_int -1, token_e_int - 1
+                token_b_int, token_e_int = token_b_int - 1, token_e_int - 1
                 event_dict['trigger']['token_b'] = token_b_int
                 event_dict['trigger']['token_e'] = token_e_int
                 event_dict['trigger']['in_tokens'] = [tok.xpath('word/text()') for tok in token_b.xpath('../token')[token_b_int: token_e_int]]
@@ -201,7 +193,7 @@ def read_and_output(fpath, input_folder) -> dict:
                 arg_dict['char_e'] = t + 1
                 token_b, token_e, _ = get_tok_sent(s, t + 1, corenlp_xml_path)
                 token_b_int, token_e_int = int(token_b.attrib['id']), int(token_e.attrib['id']) + 1
-                token_b_int, token_e_int = token_b_int -1, token_e_int - 1            
+                token_b_int, token_e_int = token_b_int - 1, token_e_int - 1
                 arg_dict['token_b'] = token_b_int
                 arg_dict['token_e'] = token_e_int
                 arg_dict['in_tokens'] = [tok.xpath('word/text()') for tok in token_b.xpath('../token')[token_b_int: token_e_int]]
@@ -213,7 +205,6 @@ def read_and_output(fpath, input_folder) -> dict:
 
         event_dict_list.append(event_dict)
 
-
     # sort and add full_id
     output = OrderedDict()
     for i, event_dict in enumerate(event_dict_list):
@@ -224,8 +215,6 @@ def read_and_output(fpath, input_folder) -> dict:
             if arg in event_dict.keys():
                 ordered_event_dict.update({arg: event_dict[arg]})
 
-        # fullid
-#         print(json.dumps(event_dict, indent=4))
         fullid = 'D' + str(event_dict['did']) + '-S' + str(event_dict['sid']) + '-EVM' + str(event_dict['id'])
         print(i, fullid)
 
@@ -245,35 +234,19 @@ def sino_extract(fpath, save_path=None) -> None:
     os.environ['SINO_HOME'] = '/workspace/event_zh/event_zh/SinoCoreferencer'
     sino_home = os.environ.get('SINO_HOME')
     
-#     input(sino_home)
-    
     sino = 'SinoCoreferencer'
-    
-    # --- in sino ---
-    # get filelist file path
-    temp_filelist_file_fullpath = os.path.join(sino_home, temp_filelist_file)
-    
-    # get data_dir (input and output)
-#     with open(temp_filelist_file_fullpath) as f:
-#         data_dir = os.path.dirname(f.read().splitlines()[0])
-        
+
     temp_dpath_in_sino = 'data/doc'
-#     temp_dpath_in_sino = data_dir.split(sino + '/')[-1]
-#     input(temp_dpath_in_sino)
     temp_dpath_in_module = os.path.join(sino, temp_dpath_in_sino)
     temp_dir_in_module = os.path.dirname(temp_dpath_in_module)
-#     input(temp_dpath_in_module)
-#     input(temp_dir_in_module)
     cmd = ['bash', 'run.sh', temp_filelist_file]
-#     cmd = ['extract-event', temp_filelist_file]
     
     # --- in project ---
     fname = os.path.basename(fpath)
     wd = os.getcwd()
-#     shutil.copy(fpath, os.path.join(mpath, 'SinoCoreferencer/stanford-corenlp-full-2014-08-27', fname))
-    
+
     # clean old files in sino
-    glob_str = temp_dpath_in_module + '\.*'
+    glob_str = temp_dpath_in_module + '.*'
     for f in glob.glob(os.path.join(mpath, glob_str)):
         print('remove', f)
         os.remove(f)
@@ -488,8 +461,7 @@ def cckd2fgc(ee_output: dict) -> dict:
 
 def get_corefs_from_eecoref_and_md(fh_eecoref, fh_md, fname):
     """
-    >>> with open('data_dir/008.coref.events') as fh_eecoref, \ 
-    ... open('data'):
+    >>> with open('data_dir/008.coref.events') as fh_eecoref, open('data'):
         get_corefs_from_eecoref_and_md(fh_eecoref)
     """
     corefs_out = OrderedDict()
@@ -582,7 +554,7 @@ def extract(fpath, save_path=None, fmt='cckd') -> dict:
     info_logger.info('>>>>> Extracting {}'.format(fpath))
     fpath_full = os.path.abspath(fpath)
     try:
-#         sino_extract(fpath, os.path.abspath(save_path))
+        # sino_extract(fpath, os.path.abspath(save_path))
         sino_extract_one(fpath_full, save_path)
         try:
             print('fpath_full', fpath_full)
@@ -636,10 +608,10 @@ def extract_and_coref(fname, save_path, fmt='cckd', to_file=False) -> dict:  # T
         with open(os.path.join(save_path, fname_base + '.coref.events')) as fh_eecoref:
             corefs_dict = get_corefs_from_eecoref_and_md(fh_eecoref, fh_md, fname_base)
     except FileNotFoundError:
-        raise
         corefs_dict = {}
+        raise
         
-    result_json = {'events':ee_md_dict, 'corefs': corefs_dict}
+    result_json = {'events': ee_md_dict, 'corefs': corefs_dict}
     
     if to_file:
         with open(fname + '.ec.json', 'w') as f:
@@ -650,8 +622,8 @@ def extract_and_coref(fname, save_path, fmt='cckd', to_file=False) -> dict:  # T
 
 if __name__ == '__main__':
     
-    #test
-#     sino_extract_one('../event_zh/testdoc', '../event_zh/data_dir')
-    print(extract_and_coref('../event_zh/testdoc', '../event_zh/data_dir', fmt='fgc', to_file=True))
-#     print(extract_to_json('../event_zh/testdoc', '../event_zh/data_dir'))
-#     print(extract_to_json('../event_zh/testdoc', '../event_zh/data_dir', fmt='fgc'))
+    # test
+    # sino_extract_one('../event_zh/testdoc', '../event_zh/data_dir')
+    logger.info(extract_and_coref('../event_zh/testdoc', '../event_zh/data_dir', fmt='fgc', to_file=True))
+    # logger.info(extract_to_json('../event_zh/testdoc', '../event_zh/data_dir'))
+    # logger.info(extract_to_json('../event_zh/testdoc', '../event_zh/data_dir', fmt='fgc'))
