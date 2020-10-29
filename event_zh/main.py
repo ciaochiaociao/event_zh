@@ -532,7 +532,7 @@ def parse_coref_format(fh) -> List[List[Tuple]]:
             range_, type_, text = data
             char_b, char_e = range_.split(',')
             
-            coref.append([(int(char_b), int(char_e)), type_, text])
+            coref.append(((int(char_b), int(char_e)), type_, text))
             
     return corefs
 
