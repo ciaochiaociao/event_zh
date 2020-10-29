@@ -14,11 +14,8 @@ from lxml.etree import Element
 from event_zh.utils import logtime
 from collections import defaultdict, OrderedDict
 
-debug_logger = setup_logger('debug', 'logs/debug.log', logging.DEBUG)
-warning_logger = setup_logger('warning', 'logs/warning.log', logging.WARNING)
-info_logger = setup_logger('info', 'logs/info.log', logging.INFO)
-info_logger.addHandler(logging.StreamHandler())
-error_logger = setup_logger('error', 'logs/error.log', logging.ERROR)
+logger = logging.getLogger(__name__)
+
 mpath = os.path.dirname(__file__)  # current script directory: .../event_zh/event_zh
 
 ace_types = {
@@ -91,7 +88,7 @@ def parse_line(line):
         match = [match.group(i) for i in range(0, 5)]
         match[1], match[2] = int(match[1]), int(match[2])
     except AttributeError:
-        warning_logger.warn('The input file might not have a correct format, which should be like "59,63 Injure 清理伤口"')
+        logger.warning('The input file might not have a correct format, which should be like "59,63 Injure 清理伤口"')
     return match
 
 
@@ -114,7 +111,7 @@ def show_event(s, t, idx_list, d):
         d[tok[0]] = '\033[91m' + '\033[1m' + d[tok[0]]
         d[tok[1]] = d[tok[1]] + '\033[0m'
     if s < 0 or t >= len(d):
-        print("invalid range (should be 0 ~ {})".format(len(d)-1))
+        logger.warning("invalid range (should be 0 ~ {})".format(len(d)-1))
     elif s >= win and t < len(d)-win-1:
         return ''.join(d[s-win: t+1+win])
     elif s < win and t > len(d)-win:
@@ -125,7 +122,7 @@ def show_event(s, t, idx_list, d):
         return ''.join(d[s-win:])
 
 
-@logtime('info')
+@logtime(__name__)
 def read_and_output(fpath, input_folder) -> dict:
     
     fname = os.path.basename(fpath)
@@ -152,7 +149,7 @@ def read_and_output(fpath, input_folder) -> dict:
     if event:
         event_list.append(event)
 
-    print('event_list:', event_list)
+    logger.info('event_list:', event_list)
 
     event_dict_list = []
 
@@ -160,8 +157,7 @@ def read_and_output(fpath, input_folder) -> dict:
     sid_event_count = defaultdict(int)
     
     for evid, event in enumerate(event_list):
-        print('event', event)
-        l_min, l_max = float('inf'), float('-inf')
+        logger.info('event', event)
         event_dict = OrderedDict({'abs_id': evid, 'trigger': OrderedDict(), 'args': []})
 
         for idx, arg in enumerate(event):
@@ -199,9 +195,9 @@ def read_and_output(fpath, input_folder) -> dict:
                 arg_dict['in_tokens'] = [tok.xpath('word/text()') for tok in token_b.xpath('../token')[token_b_int: token_e_int]]
                 event_dict['args'].append(arg_dict)
 
-        print('event_dict', event_dict)
+        logger.info('event_dict', event_dict)
         sid_event_count[event_dict['sid']] += 1
-        print('mid', sid_event_count)
+        logger.info('mid', sid_event_count)
 
         event_dict_list.append(event_dict)
 
@@ -216,17 +212,17 @@ def read_and_output(fpath, input_folder) -> dict:
                 ordered_event_dict.update({arg: event_dict[arg]})
 
         fullid = 'D' + str(event_dict['did']) + '-S' + str(event_dict['sid']) + '-EVM' + str(event_dict['id'])
-        print(i, fullid)
+        logger.info(i, fullid)
 
         # output
         output[fullid] = ordered_event_dict
 
-    print(len(output.items()))
+    logger.info(len(output.items()))
     
     return output
 
 
-@logtime('info')
+@logtime(__name__)
 def sino_extract(fpath, save_path=None) -> None:
     
     temp_filelist_file = 'default_fpath'
@@ -248,12 +244,11 @@ def sino_extract(fpath, save_path=None) -> None:
     # clean old files in sino
     glob_str = temp_dpath_in_module + '.*'
     for f in glob.glob(os.path.join(mpath, glob_str)):
-        print('remove', f)
+        logger.info('remove', f)
         os.remove(f)
         
     # copy the file to be processed to inside the SinoCoreferencer processing folder
-    print(os.path.join(mpath, temp_dir_in_module))
-    print(os.getcwd())
+    logger.info('' + str(os.path.join(mpath, temp_dir_in_module)))
     shutil.copy(fpath, os.path.join(mpath, temp_dir_in_module))
 
     # cd to Sino folder
@@ -265,8 +260,8 @@ def sino_extract(fpath, save_path=None) -> None:
                 
         stdout, stderr = pipe.communicate(timeout=900)  # if the process is not finished in 15 mins, timeout
 
-        debug_logger.debug(stderr)
-        info_logger.info(stdout)
+        logger.debug(stderr)
+        logger.info(stdout)
         
         # move output files outside the SinoCoreferencer to the project level
         if save_path is not None:
@@ -279,13 +274,13 @@ def sino_extract(fpath, save_path=None) -> None:
             shutil.move(temp_dpath_in_sino + '.type', os.path.join(save_path, fname + '.type'))
 
     except subprocess.CalledProcessError:
-        error_logger.error('Event Extraction Failed - file {}'.format(fname))
+        logger.error('Event Extraction Failed - file {}'.format(fname))
         raise
     except subprocess.TimeoutExpired:
-        error_logger.error('Event Extraction Timeout Expired (over 15 mins) - file {}'.format(fname))
+        logger.error('Event Extraction Timeout Expired (over 15 mins) - file {}'.format(fname))
         raise
-    except:
-        error_logger.error('Other Exception in Event Extraction raised - file {} [{} - {}]'.format(fname, sys.exc_info()[0], sys.exc_info()[1]))
+    except Exception:
+        logger.error('Other Exception in Event Extraction raised - file {} [{} - {}]'.format(fname, sys.exc_info()[0], sys.exc_info()[1]))
         raise
     finally:
         os.chdir(wd)  # cd back
@@ -293,7 +288,7 @@ def sino_extract(fpath, save_path=None) -> None:
     return
 
 
-@logtime('info')
+@logtime(__name__)
 def sino_extract_one(fname, save_path=None, timeout=300) -> None:
     """
     fname: could be absolute path or relative path
@@ -303,23 +298,23 @@ def sino_extract_one(fname, save_path=None, timeout=300) -> None:
     os.environ['SINO_HOME'] = '/workspace/event_zh/event_zh/SinoCoreferencer'
 
     sino_home = os.environ['SINO_HOME']
-    print(sino_home)
+    logger.info('sino_home: ' + sino_home)
     fname_abs = os.path.abspath(fname)
     fname_base = os.path.basename(fname_abs)
     save_path = os.path.abspath(save_path)
-    print(fname_abs)
-    print(fname_base)
+    logger.info('fname_abs: ' + fname_abs)
+    logger.info('fname_base: ' + fname_base)
     
     wd = os.getcwd()
     
     # cd to Sino folder
-    print('cd to SinoCoreferencer folder')
+    logger.info('cd to SinoCoreferencer folder')
     os.chdir(sino_home)
     
     # clean old files in sino before copying
     glob_str = fname_base + '*'
     for f in glob.glob(glob_str):
-        print('remove', f)
+        logger.info('remove', f)
         os.remove(f)
         
     # copy the file to be processed to inside the SinoCoreferencer processing folder
@@ -327,7 +322,7 @@ def sino_extract_one(fname, save_path=None, timeout=300) -> None:
 
     # run shell script
     copied_fname_abs = os.path.abspath(fname_base)
-    print(fname_abs, 'copied to', copied_fname_abs)
+    logger.info(fname_abs, 'copied to', copied_fname_abs)
     
     cmd = ['bash', 'run_one.sh', copied_fname_abs]  # actually, run_on.sh could take relative or absolute path
 
@@ -338,8 +333,8 @@ def sino_extract_one(fname, save_path=None, timeout=300) -> None:
         stdout, stderr = pipe.communicate(timeout=timeout)  # if the process is not finished in 15 mins, timeout
 
         # logging
-        debug_logger.debug(stderr)
-        info_logger.info(stdout)
+        logger.error('=== stderr of SinoCoreferencer ===\n' + stderr)
+        logger.info('=== stdour of SinoCoreferencer ===\n' + stdout)
         
         # move output files outside the SinoCoreferencer to the project level
         if save_path is not None:
@@ -368,13 +363,13 @@ def sino_extract_one(fname, save_path=None, timeout=300) -> None:
             shutil.move(copied_fname_abs + '.trigger', fname_abs + '.trigger')
 
     except subprocess.CalledProcessError:
-        error_logger.error('Event Extraction Failed - file {}'.format(fname))
+        logger.error('Event Extraction Failed - file {}'.format(fname))
         raise
     except subprocess.TimeoutExpired:
-        error_logger.error('Event Extraction Timeout Expired (over 15 mins) - file {}'.format(fname))
+        logger.error('Event Extraction Timeout Expired (over 15 mins) - file {}'.format(fname))
         raise
-    except:
-        error_logger.error('Other Exception in Event Extraction raised - file {} [{} - {}]'.format(fname, sys.exc_info()[0], sys.exc_info()[1]))
+    except Exception:
+        logger.error('Other Exception in Event Extraction raised - file {} [{} - {}]'.format(fname, sys.exc_info()[0], sys.exc_info()[1]))
         raise
     finally:
         os.chdir(wd)  # cd back
@@ -471,7 +466,7 @@ def get_corefs_from_eecoref_and_md(fh_eecoref, fh_md, fname):
         corefs = parse_coref_format(fh_eecoref)
 
     except FileNotFoundError as e:
-        CorefLogger.info(e)
+        logger.info(e)
     
     # get fullid from char_b, char_e
     md_json = json.load(fh_md) 
@@ -483,8 +478,8 @@ def get_corefs_from_eecoref_and_md(fh_eecoref, fh_md, fname):
             for evm in coref:
                 fullid = get_fullid_from_char_be(*evm[0], fname, md_json)
                 if fullid is None:
-                    CorefLogger.warning('Can not get fullid of mentions' + repr(evm) + ' in ' + str(fname) + '.coref.events: Probably *.md.json do not correctly get all mentions in *.arg')
-                    CorefLogger.warning(coref)
+                    logger.warning('Can not get fullid of mentions' + repr(evm) + ' in ' + str(fname) + '.coref.events: Probably *.md.json do not correctly get all mentions in *.arg')
+                    logger.warning(coref)
                 else:
                     coref_out.append(fullid)
             if len(coref_out) > 1:  # only store the coreference chain that has more than two mentions
@@ -551,22 +546,22 @@ def extract(fpath, save_path=None, fmt='cckd') -> dict:
         save_path = os.path.abspath(fpath)
     
     save_path = os.path.abspath(save_path)
-    info_logger.info('>>>>> Extracting {}'.format(fpath))
+    logger.info('>>>>> Extracting {}'.format(fpath))
     fpath_full = os.path.abspath(fpath)
     try:
         # sino_extract(fpath, os.path.abspath(save_path))
         sino_extract_one(fpath_full, save_path)
         try:
-            print('fpath_full', fpath_full)
-            print('save_path', save_path)
+            logger.info('fpath_full', fpath_full)
+            logger.info('save_path', save_path)
             output = read_and_output(fpath_full, save_path)
-            info_logger.info('Finished!')
+            logger.info('Finished!')
         except KeyError:
-            raise
-            info_logger.info('{}: No events!'.format(fpath_full))
+            logger.info('{}: No events!'.format(fpath_full))
             output = {}
+            raise
     except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
-        error_logger.error('Skip Event Extraction of this file - {}'.format(fpath))
+        logger.error('Skip Event Extraction of this file - {}'.format(fpath))
         output = {}
     except:
         raise
