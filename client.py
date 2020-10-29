@@ -8,7 +8,7 @@ params = {'text': text}
 if method.lower() == 'get':
     r = requests.get(url=URL, params=params)
 elif method.lower() == 'post':
-    r = requests.post(url=URL, data={'text': text})
+    r = requests.post(url=URL, data=params)
 else:
     raise ValueError
 
